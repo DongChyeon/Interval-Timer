@@ -1,16 +1,13 @@
 package com.dongchyeon.exerciseintervaltimer
 
-import android.util.Log
-import androidx.compose.animation.core.Animatable
-import androidx.compose.animation.core.LinearEasing
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.Button
-import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
@@ -26,37 +23,38 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.dongchyeon.exerciseintervaltimer.ui.theme.ExerciseIntervalTimerTheme
 
 @Composable
-fun TimerScreen(viewModel: TimerViewModel = viewModel()) {
-    val remainTime: Int = viewModel.remainTime
-    val totalTime: Int = viewModel.totalTime
-    val isRunning: Boolean = viewModel.isRunning
+fun TimerScreen(
+    viewModel: TimerViewModel = viewModel(),
+    modifier: Modifier = Modifier
+) {
+    val timerState by viewModel.timerState.collectAsState()
 
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = Modifier
+        modifier = modifier
             .fillMaxSize()
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier
+            modifier = modifier
                 .fillMaxSize()
         ) {
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
-                modifier = Modifier
+                modifier = modifier
                     .fillMaxWidth()
             ) {
                 CircularTimer(
-                    remainTime = remainTime,
-                    totalTime = totalTime
+                    remainTime = timerState.remainSeconds,
+                    progress = timerState.progress
                 )
                 Button(
                     onClick = {
-                        if (!isRunning) viewModel.startTimer() else viewModel.stopTimer()
+                        if (!timerState.isRunning) viewModel.startTimer() else viewModel.stopTimer()
                     }
                 ) {
                     Text(
-                        text = if (!isRunning) "시작" else "정지",
+                        text = if (!timerState.isRunning) "시작" else "정지",
                         textAlign = TextAlign.Center,
                         modifier = Modifier.width(300.dp)
                     )
@@ -71,26 +69,10 @@ fun TimerScreen(viewModel: TimerViewModel = viewModel()) {
 fun CircularTimer(
     modifier: Modifier = Modifier,
     remainTime: Int,
-    totalTime: Int,
+    progress: Float,
     activeBarColor: Color = Color.Blue,
     inactiveBarColor: Color = Color.LightGray,
 ) {
-    /*
-    val progress = remember { Animatable(remainTime / totalTime.toFloat()) }
-
-    LaunchedEffect(isRunning) {
-        progress.animateTo(
-            targetValue = 0f,
-            animationSpec = tween(
-                durationMillis = remainTime * 1000,
-                easing = LinearEasing
-            )
-        )
-    }
-    */
-
-    val progress = remainTime / totalTime.toFloat()
-
     Box(
         modifier = modifier,
         contentAlignment = Alignment.Center

@@ -1,61 +1,52 @@
 package com.dongchyeon.exerciseintervaltimer
 
-import android.os.CountDownTimer
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.launch
 
 class TimerViewModel : ViewModel() {
     private var job: Job? = null
 
-    private var _isRunning by mutableStateOf(false)
-    var isRunning: Boolean
-        get() = _isRunning
-        set(value) { _isRunning = value }
+    private val _minute = 0
+    var minute: Int = _minute
 
-    private var _minute by mutableStateOf(0)
-    var minute: Int
-        get() = _minute
-        set(value) { _minute = value }
+    private val _second = 10
+    var second: Int = _second
 
-    private var _second by mutableStateOf(30)
-    var second: Int
-        get() = _second
-        set(value) { _second = value }
+    private val _remainSeconds = 10
+    var remainSeconds: Int = _remainSeconds
 
-    private var _remainTime by mutableStateOf(0)
-    var remainTime: Int
-        get() = _remainTime
-        set(value) { _remainTime = value }
+    var totalSeconds: Int = minute * 60 + second
 
-    var totalTime : Int = minute * 60 + second
+    private val _timerState = MutableStateFlow(TimerState(remainSeconds, totalSeconds))
+    val timerState: StateFlow<TimerState> = _timerState.asStateFlow()
 
     fun startTimer() {
-        if (remainTime <= 0) remainTime = totalTime
-        isRunning = true
-        job = countDown().onEach {
-            remainTime = it
-        }.launchIn(viewModelScope)
+        if (remainSeconds <= 0) remainSeconds = totalSeconds
+        job = viewModelScope.launch {
+            countDown()
+                .onCompletion { _timerState.update { it.copy(isRunning = false) } }
+                .collect { _timerState.emit(it) }
+        }
     }
 
     fun stopTimer() {
+        viewModelScope.launch { _timerState.update { it.copy(isRunning = false) } }
         job?.cancel()
-        isRunning = false
     }
 
-    private fun countDown(): Flow<Int> = flow {
-        var time = remainTime
-        while (time > 0) {
-            delay(1000)
-            emit(--time)
-        }
-    }
+    private fun countDown(): Flow<TimerState> =
+        (remainSeconds - 1 downTo 0).asFlow()
+            .onEach {
+                delay(1000)
+                remainSeconds--
+            }
+            .onStart { emit(remainSeconds) }
+            .conflate()
+            .transform { remainSeconds: Int ->
+                emit(TimerState(remainSeconds, totalSeconds, true))
+            }
 }
