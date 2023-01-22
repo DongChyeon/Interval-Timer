@@ -8,24 +8,31 @@ import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 
 class TimerViewModel : ViewModel() {
-    private var job: Job? = null
-
-    private val _minute = 0
-    var minute: Int = _minute
-
-    private val _second = 10
-    var second: Int = _second
-
-    private val _remainSeconds = 10
-    var remainSeconds: Int = _remainSeconds
-
-    var totalSeconds: Int = minute * 60 + second
-
-    private val _timerState = MutableStateFlow(TimerState(remainSeconds, totalSeconds))
+    private val _timerState = MutableStateFlow(TimerState())
     val timerState: StateFlow<TimerState> = _timerState.asStateFlow()
 
+    private var job: Job? = null
+
+    var minute: Int = 0
+    var second = 10
+
+    private var totalTime: Int = minute * 60 + second
+    private val _remainTime = totalTime
+    var remainTime: Int = _remainTime
+
+    init {
+        viewModelScope.launch {
+            _timerState.update {
+                it.copy(
+                    remainTime = remainTime,
+                    totalTime = totalTime
+                )
+            }
+        }
+    }
+
     fun startTimer() {
-        if (remainSeconds <= 0) remainSeconds = totalSeconds
+        if (remainTime <= 0) remainTime = totalTime
         job = viewModelScope.launch {
             countDown()
                 .onCompletion { _timerState.update { it.copy(isRunning = false) } }
@@ -38,15 +45,34 @@ class TimerViewModel : ViewModel() {
         job?.cancel()
     }
 
+    fun setTimer(minute: Int, second: Int) {
+        job?.cancel()
+
+        this.minute = minute
+        this.second = second
+        totalTime = minute * 60 + second
+        remainTime = totalTime
+
+        viewModelScope.launch {
+            _timerState.update {
+                it.copy(
+                    remainTime = remainTime,
+                    totalTime = totalTime,
+                    isRunning = false
+                )
+            }
+        }
+    }
+
     private fun countDown(): Flow<TimerState> =
-        (remainSeconds - 1 downTo 0).asFlow()
+        (remainTime - 1 downTo 0).asFlow()
             .onEach {
                 delay(1000)
-                remainSeconds--
+                remainTime--
             }
-            .onStart { emit(remainSeconds) }
+            .onStart { emit(remainTime) }
             .conflate()
-            .transform { remainSeconds: Int ->
-                emit(TimerState(remainSeconds, totalSeconds, true))
+            .transform { remainTime: Int ->
+                emit(TimerState(remainTime, totalTime, true))
             }
 }

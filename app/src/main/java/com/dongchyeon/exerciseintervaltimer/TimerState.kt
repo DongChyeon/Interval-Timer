@@ -1,8 +1,8 @@
 package com.dongchyeon.exerciseintervaltimer
 
 data class TimerState(
-    val remainSeconds: Int,
-    val totalSeconds: Int,
+    val remainTime: Int = 1,
+    val totalTime: Int = 1,
     val isRunning: Boolean = false,
-    val progress: Float = remainSeconds / totalSeconds.toFloat()
+    val progress: Float = remainTime / totalTime.toFloat()
 )
