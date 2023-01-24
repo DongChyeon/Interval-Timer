@@ -6,6 +6,7 @@ import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.Surface
 import androidx.compose.ui.Modifier
+import com.dongchyeon.exerciseintervaltimer.timer.TimerScreen
 import com.dongchyeon.exerciseintervaltimer.ui.theme.ExerciseIntervalTimerTheme
 
 class MainActivity : ComponentActivity() {

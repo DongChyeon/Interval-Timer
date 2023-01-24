@@ -23,6 +23,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.dongchyeon.exerciseintervaltimer.timer.TimerViewModel
 import kotlinx.coroutines.launch
 import kotlin.math.abs
 import kotlin.math.roundToInt
@@ -67,45 +68,136 @@ fun BottomSheet(
             )
         }
 
-        Column(
-            modifier = modifier
-                .padding(top = 4.dp, bottom = 4.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
+        Row(
+            modifier = modifier,
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            Row(
-                modifier = modifier,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                NumberPicker(
-                    modifier, minute, IntRange(0, 59)
-                )
+            Text(
+                text = "준비 시간",
+                modifier = modifier
+            )
 
-                Spacer(
-                    modifier = modifier.width(8.dp)
-                )
+            Spacer(
+                modifier = modifier.width(8.dp)
+            )
 
-                Text(
-                    text = "분",
-                    modifier = modifier
-                )
+            NumberPicker(
+                modifier, minute, IntRange(0, 59)
+            )
 
-                Spacer(
-                    modifier = modifier.width(8.dp)
-                )
+            Spacer(
+                modifier = modifier.width(8.dp)
+            )
 
-                NumberPicker(
-                    modifier, second, IntRange(0, 59)
-                )
+            Text(
+                text = "분",
+                modifier = modifier
+            )
 
-                Spacer(
-                    modifier = modifier.width(8.dp)
-                )
+            Spacer(
+                modifier = modifier.width(8.dp)
+            )
 
-                Text(
-                    text = "초",
-                    modifier = modifier
-                )
-            }
+            NumberPicker(
+                modifier, second, IntRange(0, 59)
+            )
+
+            Spacer(
+                modifier = modifier.width(8.dp)
+            )
+
+            Text(
+                text = "초",
+                modifier = modifier
+            )
+        }
+
+        Row(
+            modifier = modifier,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = "운동 시간",
+                modifier = modifier
+            )
+
+            Spacer(
+                modifier = modifier.width(8.dp)
+            )
+
+            NumberPicker(
+                modifier, minute, IntRange(0, 59)
+            )
+
+            Spacer(
+                modifier = modifier.width(8.dp)
+            )
+
+            Text(
+                text = "분",
+                modifier = modifier
+            )
+
+            Spacer(
+                modifier = modifier.width(8.dp)
+            )
+
+            NumberPicker(
+                modifier, second, IntRange(0, 59)
+            )
+
+            Spacer(
+                modifier = modifier.width(8.dp)
+            )
+
+            Text(
+                text = "초",
+                modifier = modifier
+            )
+        }
+
+        Row(
+            modifier = modifier,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = "휴식 시간",
+                modifier = modifier
+            )
+
+            Spacer(
+                modifier = modifier.width(8.dp)
+            )
+
+            NumberPicker(
+                modifier, minute, IntRange(0, 59)
+            )
+
+            Spacer(
+                modifier = modifier.width(8.dp)
+            )
+
+            Text(
+                text = "분",
+                modifier = modifier
+            )
+
+            Spacer(
+                modifier = modifier.width(8.dp)
+            )
+
+            NumberPicker(
+                modifier, second, IntRange(0, 59)
+            )
+
+            Spacer(
+                modifier = modifier.width(8.dp)
+            )
+
+            Text(
+                text = "초",
+                modifier = modifier
+            )
         }
 
         Button(

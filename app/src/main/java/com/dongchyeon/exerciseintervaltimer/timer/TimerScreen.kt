@@ -1,4 +1,4 @@
-package com.dongchyeon.exerciseintervaltimer
+package com.dongchyeon.exerciseintervaltimer.timer
 
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.*
@@ -14,11 +14,13 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.dongchyeon.exerciseintervaltimer.BottomSheet
 import com.dongchyeon.exerciseintervaltimer.ui.theme.ExerciseIntervalTimerTheme
 import com.dongchyeon.exerciseintervaltimer.util.getFormattedTime
 
@@ -28,7 +30,7 @@ fun TimerScreen(
     modifier: Modifier = Modifier,
     viewModel: TimerViewModel = viewModel()
 ) {
-    val timerState by viewModel.timerState.collectAsState()
+    val timerUiState by viewModel.timerUiState.collectAsState()
     val bottomSheetScaffoldState = rememberBottomSheetScaffoldState(
         bottomSheetState = BottomSheetState(BottomSheetValue.Collapsed)
     )
@@ -58,16 +60,17 @@ fun TimerScreen(
                     .fillMaxWidth()
             ) {
                 CircularTimer(
-                    remainTime = timerState.remainTime,
-                    progress = timerState.progress
+                    remainTime = timerUiState.currentSetRemainTime,
+                    totalTime = timerUiState.currentSetTotalTime,
+                    setState = timerUiState.runningState
                 )
                 Button(
                     onClick = {
-                        if (!timerState.isRunning) viewModel.startTimer() else viewModel.stopTimer()
+                        if (!timerUiState.isRunning) viewModel.startTimer() else viewModel.stopTimer()
                     }
                 ) {
                     Text(
-                        text = if (!timerState.isRunning) "시작" else "정지",
+                        text = if (!timerUiState.isRunning) "시작" else "정지",
                         textAlign = TextAlign.Center,
                         modifier = Modifier.width(300.dp)
                     )
@@ -82,10 +85,16 @@ fun TimerScreen(
 fun CircularTimer(
     modifier: Modifier = Modifier,
     remainTime: Int,
-    progress: Float,
-    activeBarColor: Color = Color.Blue,
-    inactiveBarColor: Color = Color.LightGray,
+    totalTime: Int,
+    setState: TimerSetState
 ) {
+    val progress = remainTime / totalTime.toFloat()
+    val activeBarColor = when (setState) {
+        TimerSetState.PREPARE -> Color.DarkGray
+        TimerSetState.EXERCISE -> Color.Blue
+        TimerSetState.REST -> Color.Green
+    }
+
     Box(
         modifier = modifier,
         contentAlignment = Alignment.Center
@@ -95,13 +104,13 @@ fun CircularTimer(
                 .size(300.dp)
         ) {
             drawArc(
-                color = inactiveBarColor,
+                color = Color.LightGray,
                 startAngle = -215f,
                 sweepAngle = 250f,
                 useCenter = false,
                 size = Size(width = size.width, height = size.height),
                 topLeft = Offset(0F, 0F),
-                style = Stroke(20.dp.toPx(), cap = StrokeCap.Round)
+                style = Stroke(30.dp.toPx(), cap = StrokeCap.Round)
             )
 
             drawArc(
@@ -111,7 +120,7 @@ fun CircularTimer(
                 useCenter = false,
                 size = Size(width = size.width, height = size.height),
                 topLeft = Offset(0F, 0F),
-                style = Stroke(20.dp.toPx(), cap = StrokeCap.Round)
+                style = Stroke(30.dp.toPx(), cap = StrokeCap.Round)
             )
         }
 
@@ -119,7 +128,8 @@ fun CircularTimer(
             Text(
                 text = "${getFormattedTime(value = (remainTime / 60) % 60)}:" +
                         getFormattedTime(value = remainTime % 60),
-                fontSize = 48.sp
+                fontSize = 48.sp,
+                fontWeight = FontWeight.Bold
             )
         }
     }
