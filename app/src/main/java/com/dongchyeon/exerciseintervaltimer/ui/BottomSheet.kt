@@ -23,7 +23,10 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.dongchyeon.exerciseintervaltimer.timer.TimerViewModel
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.dongchyeon.exerciseintervaltimer.ui.timer.TimerDataState
+import com.dongchyeon.exerciseintervaltimer.ui.timer.TimerRepository.Companion.DEFAULT_STATE
+import com.dongchyeon.exerciseintervaltimer.ui.timer.TimerViewModel
 import kotlinx.coroutines.launch
 import kotlin.math.abs
 import kotlin.math.roundToInt
@@ -33,10 +36,19 @@ import kotlin.math.roundToInt
 fun BottomSheet(
     modifier: Modifier = Modifier,
     bottomSheetState: BottomSheetScaffoldState,
-    viewModel: TimerViewModel
+    timerDataState: TimerDataState,
+    viewModel: TimerViewModel,
 ) {
-    val minute = remember { mutableStateOf(viewModel.minute) }
-    val second = remember { mutableStateOf(viewModel.second) }
+    val allSets = remember { mutableStateOf(timerDataState.allSets) }
+
+    val prepareMin = remember { mutableStateOf(timerDataState.prepareSec / 60) }
+    val prepareSec = remember { mutableStateOf(timerDataState.prepareSec % 60) }
+
+    val exerciseMin = remember { mutableStateOf(timerDataState.exerciseSec / 60) }
+    val exerciseSec = remember { mutableStateOf(timerDataState.exerciseSec % 60) }
+
+    val restMin = remember { mutableStateOf(timerDataState.restSec / 60) }
+    val restSec = remember { mutableStateOf(timerDataState.restSec % 60) }
 
     Column(
         modifier = modifier
@@ -68,56 +80,16 @@ fun BottomSheet(
             )
         }
 
-        Row(
-            modifier = modifier,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(
-                text = "준비 시간",
-                modifier = modifier
-            )
-
-            Spacer(
-                modifier = modifier.width(8.dp)
-            )
-
-            NumberPicker(
-                modifier, minute, IntRange(0, 59)
-            )
-
-            Spacer(
-                modifier = modifier.width(8.dp)
-            )
-
-            Text(
-                text = "분",
-                modifier = modifier
-            )
-
-            Spacer(
-                modifier = modifier.width(8.dp)
-            )
-
-            NumberPicker(
-                modifier, second, IntRange(0, 59)
-            )
-
-            Spacer(
-                modifier = modifier.width(8.dp)
-            )
-
-            Text(
-                text = "초",
-                modifier = modifier
-            )
-        }
+        Spacer(
+            modifier = modifier.height(8.dp)
+        )
 
         Row(
             modifier = modifier,
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = "운동 시간",
+                text = "세트 수",
                 modifier = modifier
             )
 
@@ -126,85 +98,100 @@ fun BottomSheet(
             )
 
             NumberPicker(
-                modifier, minute, IntRange(0, 59)
-            )
-
-            Spacer(
-                modifier = modifier.width(8.dp)
-            )
-
-            Text(
-                text = "분",
-                modifier = modifier
-            )
-
-            Spacer(
-                modifier = modifier.width(8.dp)
-            )
-
-            NumberPicker(
-                modifier, second, IntRange(0, 59)
-            )
-
-            Spacer(
-                modifier = modifier.width(8.dp)
-            )
-
-            Text(
-                text = "초",
-                modifier = modifier
+                modifier, allSets, IntRange(1, 20)
             )
         }
 
-        Row(
-            modifier = modifier,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(
-                text = "휴식 시간",
-                modifier = modifier
-            )
+        Spacer(
+            modifier = modifier.height(8.dp)
+        )
 
-            Spacer(
-                modifier = modifier.width(8.dp)
-            )
+        TimePicker(title = "준비 시간", min = prepareMin, sec = prepareSec)
 
-            NumberPicker(
-                modifier, minute, IntRange(0, 59)
-            )
+        Spacer(
+            modifier = modifier.height(8.dp)
+        )
 
-            Spacer(
-                modifier = modifier.width(8.dp)
-            )
+        TimePicker(title = "운동 시간", min = exerciseMin, sec = exerciseSec)
 
-            Text(
-                text = "분",
-                modifier = modifier
-            )
+        Spacer(
+            modifier = modifier.height(8.dp)
+        )
 
-            Spacer(
-                modifier = modifier.width(8.dp)
-            )
+        TimePicker(title = "휴식 시간", min = restMin, sec = restSec)
 
-            NumberPicker(
-                modifier, second, IntRange(0, 59)
-            )
-
-            Spacer(
-                modifier = modifier.width(8.dp)
-            )
-
-            Text(
-                text = "초",
-                modifier = modifier
-            )
-        }
+        Spacer(
+            modifier = modifier.height(8.dp)
+        )
 
         Button(
-            onClick = { viewModel.setTimer(minute.value, second.value) },
+            onClick = {
+                viewModel.setTimer(
+                    allSets = allSets.value,
+                    prepareTime = prepareMin.value * 60 + prepareSec.value,
+                    exerciseTime = exerciseMin.value * 60 + exerciseSec.value,
+                    restTime = restMin.value * 60 + restSec.value
+                )
+            },
         ) {
             Text("타이머 재설정")
         }
+
+        Spacer(
+            modifier = modifier.height(8.dp)
+        )
+    }
+}
+
+@Composable
+fun TimePicker(
+    modifier: Modifier = Modifier,
+    title: String,
+    min: MutableState<Int>,
+    sec: MutableState<Int>,
+) {
+    Row(
+        modifier = modifier,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(
+            text = title,
+            modifier = modifier
+        )
+
+        Spacer(
+            modifier = modifier.width(8.dp)
+        )
+
+        NumberPicker(
+            modifier, min, IntRange(0, 59)
+        )
+
+        Spacer(
+            modifier = modifier.width(8.dp)
+        )
+
+        Text(
+            text = "분",
+            modifier = modifier
+        )
+
+        Spacer(
+            modifier = modifier.width(8.dp)
+        )
+
+        NumberPicker(
+            modifier, sec, IntRange(0, 59)
+        )
+
+        Spacer(
+            modifier = modifier.width(8.dp)
+        )
+
+        Text(
+            text = "초",
+            modifier = modifier
+        )
     }
 }
 
@@ -337,5 +324,9 @@ fun PreviewTimePicker() {
         bottomSheetState = BottomSheetState(BottomSheetValue.Collapsed)
     )
 
-    BottomSheet(bottomSheetState = bottomSheetScaffoldState, viewModel = TimerViewModel())
+    BottomSheet(
+        bottomSheetState = bottomSheetScaffoldState,
+        timerDataState = DEFAULT_STATE,
+        viewModel = viewModel()
+    )
 }

@@ -1,4 +1,4 @@
-package com.dongchyeon.exerciseintervaltimer.timer
+package com.dongchyeon.exerciseintervaltimer.ui.timer
 
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.*
@@ -23,6 +23,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.dongchyeon.exerciseintervaltimer.BottomSheet
 import com.dongchyeon.exerciseintervaltimer.ui.theme.ExerciseIntervalTimerTheme
 import com.dongchyeon.exerciseintervaltimer.util.getFormattedTime
+import com.dongchyeon.exerciseintervaltimer.util.toSec
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
@@ -30,7 +31,7 @@ fun TimerScreen(
     modifier: Modifier = Modifier,
     viewModel: TimerViewModel = viewModel()
 ) {
-    val timerUiState by viewModel.timerUiState.collectAsState()
+    val timerDataState by viewModel.timerDataState.collectAsState()
     val bottomSheetScaffoldState = rememberBottomSheetScaffoldState(
         bottomSheetState = BottomSheetState(BottomSheetValue.Collapsed)
     )
@@ -45,7 +46,7 @@ fun TimerScreen(
             topEnd = 12.dp
         ),
         sheetContent = {
-            BottomSheet(modifier, bottomSheetScaffoldState, viewModel)
+            BottomSheet(modifier, bottomSheetScaffoldState, timerDataState, viewModel)
         },
         sheetPeekHeight = 50.dp
     ) {
@@ -60,17 +61,18 @@ fun TimerScreen(
                     .fillMaxWidth()
             ) {
                 CircularTimer(
-                    remainTime = timerUiState.currentSetRemainTime,
-                    totalTime = timerUiState.currentSetTotalTime,
-                    setState = timerUiState.runningState
+                    remainMillis = timerDataState.currentRoundRemainMillis,
+                    totalMillis = timerDataState.currentRoundTotalMillis,
+                    roundState = timerDataState.roundState
                 )
+
                 Button(
                     onClick = {
-                        if (!timerUiState.isRunning) viewModel.startTimer() else viewModel.stopTimer()
+                        if (!timerDataState.isRunning) viewModel.startTimer() else viewModel.pauseTimer()
                     }
                 ) {
                     Text(
-                        text = if (!timerUiState.isRunning) "시작" else "정지",
+                        text = if (!timerDataState.isRunning) "시작" else "정지",
                         textAlign = TextAlign.Center,
                         modifier = Modifier.width(300.dp)
                     )
@@ -84,15 +86,15 @@ fun TimerScreen(
 @Composable
 fun CircularTimer(
     modifier: Modifier = Modifier,
-    remainTime: Int,
-    totalTime: Int,
-    setState: TimerSetState
+    remainMillis: Long,
+    totalMillis: Long,
+    roundState: TimerRoundState
 ) {
-    val progress = remainTime / totalTime.toFloat()
-    val activeBarColor = when (setState) {
-        TimerSetState.PREPARE -> Color.DarkGray
-        TimerSetState.EXERCISE -> Color.Blue
-        TimerSetState.REST -> Color.Green
+    val progress = remainMillis / totalMillis.toFloat()
+    val activeBarColor = when (roundState) {
+        TimerRoundState.PREPARE -> Color.DarkGray
+        TimerRoundState.EXERCISE -> Color.Blue
+        TimerRoundState.REST -> Color.Green
     }
 
     Box(
@@ -126,8 +128,18 @@ fun CircularTimer(
 
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
             Text(
-                text = "${getFormattedTime(value = (remainTime / 60) % 60)}:" +
-                        getFormattedTime(value = remainTime % 60),
+                text = when (roundState) {
+                    TimerRoundState.PREPARE -> "준비"
+                    TimerRoundState.EXERCISE -> "운동"
+                    TimerRoundState.REST -> "휴식"
+                },
+                textAlign = TextAlign.Center,
+                fontSize = 32.sp,
+            )
+
+            Text(
+                text = "${getFormattedTime(value = (remainMillis.toSec() / 60) % 60)}:" +
+                        getFormattedTime(value = remainMillis.toSec() % 60),
                 fontSize = 48.sp,
                 fontWeight = FontWeight.Bold
             )
