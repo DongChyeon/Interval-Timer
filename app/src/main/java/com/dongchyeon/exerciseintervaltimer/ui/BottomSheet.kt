@@ -1,4 +1,4 @@
-package com.dongchyeon.exerciseintervaltimer
+package com.dongchyeon.exerciseintervaltimer.ui
 
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.background
@@ -23,7 +23,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.dongchyeon.exerciseintervaltimer.ui.timer.TimerDataState
 import com.dongchyeon.exerciseintervaltimer.ui.timer.TimerRepository.Companion.DEFAULT_STATE
 import com.dongchyeon.exerciseintervaltimer.ui.timer.TimerViewModel
@@ -125,6 +125,10 @@ fun BottomSheet(
         )
 
         Button(
+            colors = ButtonDefaults.buttonColors(
+                backgroundColor = Color.Black,
+                contentColor = Color.White
+            ),
             onClick = {
                 viewModel.setTimer(
                     allSets = allSets.value,
@@ -327,6 +331,6 @@ fun PreviewTimePicker() {
     BottomSheet(
         bottomSheetState = bottomSheetScaffoldState,
         timerDataState = DEFAULT_STATE,
-        viewModel = viewModel()
+        viewModel = hiltViewModel()
     )
 }

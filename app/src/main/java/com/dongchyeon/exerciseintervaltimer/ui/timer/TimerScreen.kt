@@ -20,7 +20,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.dongchyeon.exerciseintervaltimer.BottomSheet
+import com.dongchyeon.exerciseintervaltimer.ui.BottomSheet
 import com.dongchyeon.exerciseintervaltimer.ui.theme.ExerciseIntervalTimerTheme
 import com.dongchyeon.exerciseintervaltimer.util.getFormattedTime
 import com.dongchyeon.exerciseintervaltimer.util.toSec
@@ -67,6 +67,10 @@ fun TimerScreen(
                 )
 
                 Button(
+                    colors = ButtonDefaults.buttonColors(
+                        backgroundColor = Color.Black,
+                        contentColor = Color.White
+                    ),
                     onClick = {
                         if (!timerDataState.isRunning) viewModel.startTimer() else viewModel.pauseTimer()
                     }
@@ -81,7 +85,6 @@ fun TimerScreen(
         }
     }
 }
-
 
 @Composable
 fun CircularTimer(

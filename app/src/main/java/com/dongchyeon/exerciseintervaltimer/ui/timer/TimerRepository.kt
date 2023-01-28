@@ -1,15 +1,19 @@
 package com.dongchyeon.exerciseintervaltimer.ui.timer
 
 import android.os.SystemClock
+import android.speech.tts.TextToSpeech
+import android.speech.tts.TextToSpeech.QUEUE_FLUSH
 import com.dongchyeon.exerciseintervaltimer.util.toMillis
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.update
+import javax.inject.Inject
 import kotlin.properties.Delegates
 
-class TimerRepository {
+class TimerRepository @Inject constructor(
+    private val tts: TextToSpeech
+) {
     companion object {
         val DEFAULT_STATE = TimerDataState(
             allSets = 3,
@@ -20,7 +24,7 @@ class TimerRepository {
     }
 
     private val _dataState = MutableStateFlow(DEFAULT_STATE)
-    val dataState = _dataState.asSharedFlow()
+    val dataState = _dataState
 
     private var isRunning = false
     private var isFinished = false
@@ -56,6 +60,12 @@ class TimerRepository {
         isRunning = true
         _dataState.update { it.copy(isRunning = true) }
 
+        when (_dataState.value.roundState) {
+            TimerRoundState.PREPARE -> playAlarm("준비")
+            TimerRoundState.EXERCISE -> playAlarm("운동")
+            TimerRoundState.REST -> playAlarm("휴식")
+        }
+
         flow {
             while (isRunning) {
                 val startTime = SystemClock.elapsedRealtime()
@@ -80,6 +90,7 @@ class TimerRepository {
                 }
 
                 if (currentLeftTime <= 0) {  // 현재 라운드 종료
+
                     var roundTotalTime by Delegates.notNull<Long>()
                     var roundRemainTime by Delegates.notNull<Long>()
 
@@ -87,6 +98,12 @@ class TimerRepository {
                         TimerRoundState.PREPARE -> TimerRoundState.EXERCISE
                         TimerRoundState.EXERCISE -> TimerRoundState.REST
                         TimerRoundState.REST -> TimerRoundState.EXERCISE
+                    }
+
+                    when (nextRound) {
+                        TimerRoundState.PREPARE -> playAlarm("준비")
+                        TimerRoundState.EXERCISE -> playAlarm("운동")
+                        TimerRoundState.REST -> playAlarm("휴식")
                     }
 
                     val set =
@@ -124,5 +141,9 @@ class TimerRepository {
     fun pause() {
         isRunning = false
         _dataState.update { it.copy(isRunning = false) }
+    }
+
+    private fun playAlarm(string: CharSequence) {
+        tts.speak(string, QUEUE_FLUSH, null, null)
     }
 }
