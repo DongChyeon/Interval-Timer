@@ -1,25 +1,26 @@
 package com.dongchyeon.exerciseintervaltimer.ui.timer
 
+import android.content.Context
+import android.media.SoundPool
 import android.os.SystemClock
 import android.speech.tts.TextToSpeech
 import android.speech.tts.TextToSpeech.QUEUE_FLUSH
+import com.dongchyeon.exerciseintervaltimer.R
 import com.dongchyeon.exerciseintervaltimer.util.toMillis
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.update
-import javax.inject.Inject
+import java.util.*
 import kotlin.properties.Delegates
 
-class TimerRepository @Inject constructor(
-    private val tts: TextToSpeech
-) {
+class TimerRepository(context: Context) {
     companion object {
         val DEFAULT_STATE = TimerDataState(
             allSets = 3,
-            prepareSec = 30,
-            exerciseSec = 30,
-            restSec = 30,
+            prepareSec = 10,
+            exerciseSec = 10,
+            restSec = 10,
         )
     }
 
@@ -28,6 +29,18 @@ class TimerRepository @Inject constructor(
 
     private var isRunning = false
     private var isFinished = false
+    private var countDownDone = false
+
+    private lateinit var tts: TextToSpeech
+
+    private val soundPool = SoundPool.Builder().build()
+    private val countDownID = soundPool.load(context, R.raw.countdown, 1)
+
+    init {
+        tts = TextToSpeech(context) {
+            if (it == TextToSpeech.SUCCESS) tts.language = Locale.KOREAN
+        }
+    }
 
     fun setTimer(
         allSets: Int,
@@ -58,6 +71,7 @@ class TimerRepository @Inject constructor(
         }
 
         isRunning = true
+        countDownDone = false
         _dataState.update { it.copy(isRunning = true) }
 
         when (_dataState.value.roundState) {
@@ -89,8 +103,12 @@ class TimerRepository @Inject constructor(
                     )
                 }
 
-                if (currentLeftTime <= 0) {  // 현재 라운드 종료
+                if (currentLeftTime <= 3500L && !countDownDone) {
+                    countDownDone = true
+                    soundPool.play(countDownID, 0.3F, 0.3F, 0, 0, 1F)
+                }
 
+                if (currentLeftTime <= 0) {  // 현재 라운드 종료
                     var roundTotalTime by Delegates.notNull<Long>()
                     var roundRemainTime by Delegates.notNull<Long>()
 
@@ -129,6 +147,8 @@ class TimerRepository @Inject constructor(
                         currentRoundRemainMillis = roundRemainTime,
                         roundState = nextRound
                     )
+
+                    countDownDone = false
                 }
 
                 emit(_dataState.value)

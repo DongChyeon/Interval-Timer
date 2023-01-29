@@ -12,6 +12,7 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -19,6 +20,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.dongchyeon.exerciseintervaltimer.ui.BottomSheet
 import com.dongchyeon.exerciseintervaltimer.ui.theme.ExerciseIntervalTimerTheme
+import com.dongchyeon.exerciseintervaltimer.ui.theme.Purple700
 import com.dongchyeon.exerciseintervaltimer.ui.timer.TimerRepository.Companion.DEFAULT_STATE
 import com.dongchyeon.exerciseintervaltimer.util.getFormattedTime
 import com.dongchyeon.exerciseintervaltimer.util.toSec
@@ -57,11 +59,28 @@ fun TimerScreen(
                 modifier = modifier
                     .fillMaxWidth()
             ) {
+                Text("진행율")
+
+                Spacer(modifier = modifier.height(4.dp))
+
+                LinearProgressIndicator(
+                    modifier = modifier
+                        .width(320.dp)
+                        .height(15.dp),
+                    progress = 1 - (timerDataState.totalRemainMillis / timerDataState.totalMillis.toFloat()),
+                    backgroundColor = Color.LightGray,
+                    color = Purple700
+                )
+
+                Spacer(modifier = modifier.height(32.dp))
+
                 CircularTimer(
                     remainMillis = timerDataState.currentRoundRemainMillis,
                     totalMillis = timerDataState.currentRoundTotalMillis,
                     roundState = timerDataState.roundState
                 )
+
+                Spacer(modifier = modifier.height(32.dp))
 
                 Button(
                     colors = ButtonDefaults.buttonColors(
@@ -107,8 +126,8 @@ fun CircularTimer(
         ) {
             drawArc(
                 color = Color.LightGray,
-                startAngle = -215f,
-                sweepAngle = 250f,
+                startAngle = -90f,
+                sweepAngle = 360f,
                 useCenter = false,
                 size = Size(width = size.width, height = size.height),
                 topLeft = Offset(0F, 0F),
@@ -117,8 +136,8 @@ fun CircularTimer(
 
             drawArc(
                 color = activeBarColor,
-                startAngle = -215f,
-                sweepAngle = 250f * progress,
+                startAngle = -90f,
+                sweepAngle = 360f * progress,
                 useCenter = false,
                 size = Size(width = size.width, height = size.height),
                 topLeft = Offset(0F, 0F),
@@ -140,8 +159,10 @@ fun CircularTimer(
             Text(
                 text = "${getFormattedTime(value = (remainMillis.toSec() / 60) % 60)}:" +
                         getFormattedTime(value = remainMillis.toSec() % 60),
-                fontSize = 48.sp,
-                fontWeight = FontWeight.Bold
+                style = TextStyle(
+                    fontSize = 48.sp,
+                    fontWeight = FontWeight.Bold
+                )
             )
         }
     }

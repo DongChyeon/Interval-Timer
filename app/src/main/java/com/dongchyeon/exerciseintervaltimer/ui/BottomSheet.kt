@@ -82,41 +82,54 @@ fun BottomSheet(
             modifier = modifier.height(8.dp)
         )
 
-        Row(
-            modifier = modifier,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(
-                text = "세트 수",
-                modifier = modifier
-            )
+        Text(
+            text = "세트 수",
+            modifier = modifier
+        )
 
-            Spacer(
-                modifier = modifier.width(8.dp)
-            )
+        Spacer(
+            modifier = modifier.height(4.dp)
+        )
 
-            NumberPicker(
-                modifier, allSets, IntRange(1, 20)
+        NumberPicker(
+            modifier, allSets, IntRange(1, 20), textStyle = TextStyle(
+                fontSize = 18.sp,
+                fontWeight = FontWeight.SemiBold
             )
-        }
+        )
 
         Spacer(
             modifier = modifier.height(8.dp)
         )
 
-        TimePicker(title = "준비 시간", min = prepareMin, sec = prepareSec)
+        TimePicker(
+            title = "준비 시간", min = prepareMin, sec = prepareSec, textStyle = TextStyle(
+                fontSize = 18.sp,
+                fontWeight = FontWeight.SemiBold
+            )
+        )
 
         Spacer(
             modifier = modifier.height(8.dp)
         )
 
-        TimePicker(title = "운동 시간", min = exerciseMin, sec = exerciseSec)
+        TimePicker(
+            title = "운동 시간", min = exerciseMin, sec = exerciseSec, textStyle = TextStyle(
+                fontSize = 18.sp,
+                fontWeight = FontWeight.SemiBold
+            )
+        )
 
         Spacer(
             modifier = modifier.height(8.dp)
         )
 
-        TimePicker(title = "휴식 시간", min = restMin, sec = restSec)
+        TimePicker(
+            title = "휴식 시간", min = restMin, sec = restSec, textStyle = TextStyle(
+                fontSize = 18.sp,
+                fontWeight = FontWeight.SemiBold
+            )
+        )
 
         Spacer(
             modifier = modifier.height(8.dp)
@@ -151,10 +164,11 @@ fun TimePicker(
     title: String,
     min: MutableState<Int>,
     sec: MutableState<Int>,
+    textStyle: TextStyle = LocalTextStyle.current
 ) {
-    Row(
+    Column(
         modifier = modifier,
-        verticalAlignment = Alignment.CenterVertically
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(
             text = title,
@@ -162,38 +176,51 @@ fun TimePicker(
         )
 
         Spacer(
-            modifier = modifier.width(8.dp)
+            modifier = modifier.height(4.dp)
         )
 
-        NumberPicker(
-            modifier, min, IntRange(0, 59)
-        )
+        Row(
+            modifier = modifier,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            NumberPicker(
+                modifier = modifier,
+                state = min,
+                range = IntRange(0, 59),
+                textStyle = textStyle
+            )
 
-        Spacer(
-            modifier = modifier.width(8.dp)
-        )
+            Spacer(
+                modifier = modifier.width(8.dp)
+            )
 
-        Text(
-            text = "분",
-            modifier = modifier
-        )
+            Text(
+                text = "분",
+                style = textStyle,
+                modifier = modifier
+            )
 
-        Spacer(
-            modifier = modifier.width(8.dp)
-        )
+            Spacer(
+                modifier = modifier.width(8.dp)
+            )
 
-        NumberPicker(
-            modifier, sec, IntRange(0, 59)
-        )
+            NumberPicker(
+                modifier = modifier,
+                state = sec,
+                range = IntRange(0, 59),
+                textStyle = textStyle
+            )
 
-        Spacer(
-            modifier = modifier.width(8.dp)
-        )
+            Spacer(
+                modifier = modifier.width(8.dp)
+            )
 
-        Text(
-            text = "초",
-            modifier = modifier
-        )
+            Text(
+                text = "초",
+                style = textStyle,
+                modifier = modifier
+            )
+        }
     }
 }
 
