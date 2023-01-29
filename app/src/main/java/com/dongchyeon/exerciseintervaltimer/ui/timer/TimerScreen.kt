@@ -5,8 +5,6 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
@@ -19,9 +17,9 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.dongchyeon.exerciseintervaltimer.ui.BottomSheet
 import com.dongchyeon.exerciseintervaltimer.ui.theme.ExerciseIntervalTimerTheme
+import com.dongchyeon.exerciseintervaltimer.ui.timer.TimerRepository.Companion.DEFAULT_STATE
 import com.dongchyeon.exerciseintervaltimer.util.getFormattedTime
 import com.dongchyeon.exerciseintervaltimer.util.toSec
 
@@ -29,13 +27,12 @@ import com.dongchyeon.exerciseintervaltimer.util.toSec
 @Composable
 fun TimerScreen(
     modifier: Modifier = Modifier,
-    viewModel: TimerViewModel = viewModel()
+    timerDataState: TimerDataState,
+    startTimer: () -> Unit,
+    pauseTimer: () -> Unit,
+    bottomSheetScaffoldState: BottomSheetScaffoldState,
+    setTimer: (allSets: Int, prepareTime: Int, exerciseTime: Int, restTime: Int) -> Unit
 ) {
-    val timerDataState by viewModel.timerDataState.collectAsState()
-    val bottomSheetScaffoldState = rememberBottomSheetScaffoldState(
-        bottomSheetState = BottomSheetState(BottomSheetValue.Collapsed)
-    )
-
     BottomSheetScaffold(
         scaffoldState = bottomSheetScaffoldState,
         sheetElevation = 8.dp,
@@ -46,7 +43,7 @@ fun TimerScreen(
             topEnd = 12.dp
         ),
         sheetContent = {
-            BottomSheet(modifier, bottomSheetScaffoldState, timerDataState, viewModel)
+            BottomSheet(modifier, bottomSheetScaffoldState, timerDataState, setTimer)
         },
         sheetPeekHeight = 50.dp
     ) {
@@ -72,7 +69,7 @@ fun TimerScreen(
                         contentColor = Color.White
                     ),
                     onClick = {
-                        if (!timerDataState.isRunning) viewModel.startTimer() else viewModel.pauseTimer()
+                        if (!timerDataState.isRunning) startTimer() else pauseTimer()
                     }
                 ) {
                     Text(
@@ -150,10 +147,21 @@ fun CircularTimer(
     }
 }
 
+@OptIn(ExperimentalMaterialApi::class)
 @Preview
 @Composable
 fun PreviewTimer() {
     ExerciseIntervalTimerTheme {
-        TimerScreen()
+        TimerScreen(
+            timerDataState = DEFAULT_STATE,
+            startTimer = { },
+            pauseTimer = { },
+            bottomSheetScaffoldState = BottomSheetScaffoldState(
+                drawerState = DrawerState(DrawerValue.Closed),
+                bottomSheetState = BottomSheetState(BottomSheetValue.Collapsed),
+                snackbarHostState = SnackbarHostState()
+            ),
+            setTimer = { _, _, _, _ -> }
+        )
     }
 }

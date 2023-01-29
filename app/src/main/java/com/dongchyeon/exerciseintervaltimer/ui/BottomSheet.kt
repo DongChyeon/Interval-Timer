@@ -23,10 +23,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.hilt.navigation.compose.hiltViewModel
 import com.dongchyeon.exerciseintervaltimer.ui.timer.TimerDataState
 import com.dongchyeon.exerciseintervaltimer.ui.timer.TimerRepository.Companion.DEFAULT_STATE
-import com.dongchyeon.exerciseintervaltimer.ui.timer.TimerViewModel
 import kotlinx.coroutines.launch
 import kotlin.math.abs
 import kotlin.math.roundToInt
@@ -37,7 +35,7 @@ fun BottomSheet(
     modifier: Modifier = Modifier,
     bottomSheetState: BottomSheetScaffoldState,
     timerDataState: TimerDataState,
-    viewModel: TimerViewModel,
+    setTimer: (allSets: Int, prepareTime: Int, exerciseTime: Int, restTime: Int) -> Unit
 ) {
     val allSets = remember { mutableStateOf(timerDataState.allSets) }
 
@@ -130,11 +128,11 @@ fun BottomSheet(
                 contentColor = Color.White
             ),
             onClick = {
-                viewModel.setTimer(
-                    allSets = allSets.value,
-                    prepareTime = prepareMin.value * 60 + prepareSec.value,
-                    exerciseTime = exerciseMin.value * 60 + exerciseSec.value,
-                    restTime = restMin.value * 60 + restSec.value
+                setTimer(
+                    allSets.value,
+                    prepareMin.value * 60 + prepareSec.value,
+                    exerciseMin.value * 60 + exerciseSec.value,
+                    restMin.value * 60 + restSec.value
                 )
             },
         ) {
@@ -324,13 +322,12 @@ private suspend fun Animatable<Float, AnimationVector1D>.fling(
 @Preview
 @Composable
 fun PreviewTimePicker() {
-    val bottomSheetScaffoldState = rememberBottomSheetScaffoldState(
-        bottomSheetState = BottomSheetState(BottomSheetValue.Collapsed)
-    )
-
     BottomSheet(
-        bottomSheetState = bottomSheetScaffoldState,
+        bottomSheetState = BottomSheetScaffoldState(
+            drawerState = DrawerState(DrawerValue.Closed),
+            bottomSheetState = BottomSheetState(BottomSheetValue.Collapsed),
+            snackbarHostState = SnackbarHostState()
+        ),
         timerDataState = DEFAULT_STATE,
-        viewModel = hiltViewModel()
-    )
+        setTimer = { _, _, _, _ -> })
 }
