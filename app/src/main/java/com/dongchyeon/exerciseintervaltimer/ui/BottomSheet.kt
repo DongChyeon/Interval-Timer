@@ -166,9 +166,9 @@ fun TimePicker(
     sec: MutableState<Int>,
     textStyle: TextStyle = LocalTextStyle.current
 ) {
-    Column(
+    Row(
         modifier = modifier,
-        horizontalAlignment = Alignment.CenterHorizontally
+        verticalAlignment = Alignment.CenterVertically
     ) {
         Text(
             text = title,
@@ -176,7 +176,7 @@ fun TimePicker(
         )
 
         Spacer(
-            modifier = modifier.height(4.dp)
+            modifier = modifier.width(8.dp)
         )
 
         Row(

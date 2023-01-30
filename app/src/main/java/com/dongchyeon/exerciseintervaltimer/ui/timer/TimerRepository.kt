@@ -125,7 +125,7 @@ class TimerRepository(context: Context) {
                     }
 
                     val set =
-                        if (nextRound == TimerRoundState.REST) _dataState.value.currentSet - 1 else _dataState.value.currentSet
+                        if (nextRound == TimerRoundState.REST) _dataState.value.currentSet + 1 else _dataState.value.currentSet
                     when (nextRound) {
                         TimerRoundState.PREPARE -> {
                             roundTotalTime = _dataState.value.prepareSec.toMillis()
@@ -160,6 +160,7 @@ class TimerRepository(context: Context) {
 
     fun pause() {
         isRunning = false
+        soundPool.stop(countDownID)
         _dataState.update { it.copy(isRunning = false) }
     }
 

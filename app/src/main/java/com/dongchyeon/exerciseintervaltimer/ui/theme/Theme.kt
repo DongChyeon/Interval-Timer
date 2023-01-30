@@ -5,6 +5,7 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.material.darkColors
 import androidx.compose.material.lightColors
 import androidx.compose.runtime.Composable
+import com.google.accompanist.systemuicontroller.rememberSystemUiController
 
 private val DarkColorPalette = darkColors(
     primary = Purple200,
@@ -41,6 +42,10 @@ fun ExerciseIntervalTimerTheme(
      */
 
     val colors = LightColorPalette
+    val systemUiController = rememberSystemUiController()
+    systemUiController.setSystemBarsColor(
+        color = androidx.compose.ui.graphics.Color.Black
+    )
 
     MaterialTheme(
         colors = colors,

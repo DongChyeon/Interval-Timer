@@ -1,17 +1,15 @@
 package com.dongchyeon.exerciseintervaltimer.ui.timer
 
-import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.PauseCircle
+import androidx.compose.material.icons.filled.PlayCircle
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.StrokeCap
-import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -20,7 +18,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.dongchyeon.exerciseintervaltimer.ui.BottomSheet
 import com.dongchyeon.exerciseintervaltimer.ui.theme.ExerciseIntervalTimerTheme
-import com.dongchyeon.exerciseintervaltimer.ui.theme.Purple700
 import com.dongchyeon.exerciseintervaltimer.ui.timer.TimerRepository.Companion.DEFAULT_STATE
 import com.dongchyeon.exerciseintervaltimer.util.getFormattedTime
 import com.dongchyeon.exerciseintervaltimer.util.toSec
@@ -69,7 +66,7 @@ fun TimerScreen(
                         .height(15.dp),
                     progress = 1 - (timerDataState.totalRemainMillis / timerDataState.totalMillis.toFloat()),
                     backgroundColor = Color.LightGray,
-                    color = Purple700
+                    color = Color.Black
                 )
 
                 Spacer(modifier = modifier.height(32.dp))
@@ -82,20 +79,63 @@ fun TimerScreen(
 
                 Spacer(modifier = modifier.height(32.dp))
 
-                Button(
-                    colors = ButtonDefaults.buttonColors(
-                        backgroundColor = Color.Black,
-                        contentColor = Color.White
-                    ),
-                    onClick = {
-                        if (!timerDataState.isRunning) startTimer() else pauseTimer()
-                    }
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    modifier = modifier.fillMaxWidth()
                 ) {
-                    Text(
-                        text = if (!timerDataState.isRunning) "시작" else "정지",
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier.width(300.dp)
-                    )
+                    Spacer(modifier = modifier.width(24.dp))
+
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        modifier = modifier
+                    ) {
+                        Text(
+                            text = "전체 세트",
+                            textAlign = TextAlign.Center,
+                            fontSize = 18.sp,
+                        )
+                        Text(
+                            text = "${timerDataState.allSets}",
+                            textAlign = TextAlign.Center,
+                            style = TextStyle(
+                                fontSize = 48.sp,
+                                fontWeight = FontWeight.Bold
+                            )
+                        )
+                    }
+
+                    IconButton(onClick = {
+                        if (!timerDataState.isRunning) startTimer() else pauseTimer()
+                    }) {
+                        Icon(
+                            imageVector = if (!timerDataState.isRunning) Icons.Default.PlayCircle else Icons.Default.PauseCircle,
+                            contentDescription = null,
+                            modifier = modifier
+                                .size(120.dp)
+                        )
+                    }
+
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        modifier = modifier
+                    ) {
+                        Text(
+                            text = "현재 세트",
+                            textAlign = TextAlign.Center,
+                            fontSize = 18.sp,
+                        )
+                        Text(
+                            text = "${timerDataState.currentSet}",
+                            textAlign = TextAlign.Center,
+                            style = TextStyle(
+                                fontSize = 48.sp,
+                                fontWeight = FontWeight.Bold
+                            )
+                        )
+                    }
+
+                    Spacer(modifier = modifier.width(24.dp))
                 }
             }
         }
@@ -113,37 +153,26 @@ fun CircularTimer(
     val activeBarColor = when (roundState) {
         TimerRoundState.PREPARE -> Color.DarkGray
         TimerRoundState.EXERCISE -> Color.Blue
-        TimerRoundState.REST -> Color.Green
+        TimerRoundState.REST -> Color(0xFFFF5722)
     }
 
     Box(
         modifier = modifier,
         contentAlignment = Alignment.Center
     ) {
-        Canvas(
-            modifier = modifier
-                .size(300.dp)
-        ) {
-            drawArc(
-                color = Color.LightGray,
-                startAngle = -90f,
-                sweepAngle = 360f,
-                useCenter = false,
-                size = Size(width = size.width, height = size.height),
-                topLeft = Offset(0F, 0F),
-                style = Stroke(30.dp.toPx(), cap = StrokeCap.Round)
-            )
+        CircularProgressIndicator(
+            modifier = Modifier.size(300.dp),
+            color = activeBarColor,
+            progress = 100f,
+            strokeWidth = 20.dp
+        )
 
-            drawArc(
-                color = activeBarColor,
-                startAngle = -90f,
-                sweepAngle = 360f * progress,
-                useCenter = false,
-                size = Size(width = size.width, height = size.height),
-                topLeft = Offset(0F, 0F),
-                style = Stroke(30.dp.toPx(), cap = StrokeCap.Round)
-            )
-        }
+        CircularProgressIndicator(
+            modifier = Modifier.size(300.dp),
+            color = Color.LightGray,
+            progress = 1 - progress,
+            strokeWidth = 20.dp
+        )
 
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
             Text(
@@ -153,14 +182,14 @@ fun CircularTimer(
                     TimerRoundState.REST -> "휴식"
                 },
                 textAlign = TextAlign.Center,
-                fontSize = 32.sp,
+                fontSize = 48.sp,
             )
 
             Text(
                 text = "${getFormattedTime(value = (remainMillis.toSec() / 60) % 60)}:" +
                         getFormattedTime(value = remainMillis.toSec() % 60),
                 style = TextStyle(
-                    fontSize = 48.sp,
+                    fontSize = 60.sp,
                     fontWeight = FontWeight.Bold
                 )
             )
