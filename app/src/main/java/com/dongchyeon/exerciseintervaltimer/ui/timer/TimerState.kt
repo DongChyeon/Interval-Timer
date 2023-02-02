@@ -3,7 +3,7 @@ package com.dongchyeon.exerciseintervaltimer.ui.timer
 import com.dongchyeon.exerciseintervaltimer.util.toMillis
 
 data class TimerDataState(
-    val currentSet: Int = 1,
+    val currentSet: Int = 0,
     val allSets: Int,
 
     val prepareSec: Int,

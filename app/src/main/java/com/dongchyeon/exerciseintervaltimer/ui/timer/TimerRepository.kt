@@ -125,7 +125,7 @@ class TimerRepository(context: Context) {
                     }
 
                     val set =
-                        if (nextRound == TimerRoundState.REST) _dataState.value.currentSet + 1 else _dataState.value.currentSet
+                        if (nextRound == TimerRoundState.EXERCISE) _dataState.value.currentSet + 1 else _dataState.value.currentSet
                     when (nextRound) {
                         TimerRoundState.PREPARE -> {
                             roundTotalTime = _dataState.value.prepareSec.toMillis()
